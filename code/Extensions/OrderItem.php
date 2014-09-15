@@ -27,6 +27,6 @@ class OrderItem extends \DataExtension {
     }
 
     protected function isAffectedItem($buyable, $during) {
-        return !SiteConfig::env('Shop_DisableInventory') && strtolower(SiteConfig::env('Shop_AffectStockDuring')) == $during && ($buyable instanceof \Object) && $buyable->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\Product');
+        return !Config::env('Shop_DisableInventory') && strtolower(Config::env('Shop_AffectStockDuring')) == $during && ($buyable instanceof \Object) && $buyable->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\Product');
     }
 } 

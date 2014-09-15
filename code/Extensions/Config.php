@@ -11,7 +11,7 @@ namespace Milkyway\SS\Shop\Inventory\Extensions;
 
 use Doctrine\Common\Inflector\Inflector;
 
-class SiteConfig extends \DataExtension {
+class Config extends \DataExtension {
     public static $environment = [];
 
     private static $db = [
@@ -27,11 +27,10 @@ class SiteConfig extends \DataExtension {
     private static $shop_affect_stock_during = 'placement'; // Can be: cart, placement, payment
 
     public function updateCMSFields(\FieldList $fields) {
-        $fields->addFieldsToTab('Root.Shop.Modules', [
-                \HeaderField::create('Heading-ShopInventory', _t('ShopInventory.MODULE_TITLE', 'Shop Inventory'), 3),
+        $fields->addFieldsToTab('Root.Shop.ShopTabs.ShopInventory', [
                 \CheckboxField::create('Shop_DisableInventory', _t('ShopInventory.DISABLE', 'Disable')),
                 \NumericField::create('Shop_NotifyWhenStockReaches', _t('ShopInventory.NotifyWhenStockReaches', 'Notify when stock reaches')),
-                \NumericField::create('Shop_NotifyEmail', _t('ShopInventory.NotifyWhenStockReaches', 'Notify when stock reaches')),
+                \TextField::create('Shop_NotifyEmail', _t('ShopInventory.NotifyWhenStockReaches', 'Email to notify'))->setAttribute('placeholder', Config::env('AdminForEmail') ? : \Config::inst()->get('Email', 'admin_email')),
             ]
         );
     }

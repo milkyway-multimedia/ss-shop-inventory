@@ -21,15 +21,15 @@ class Product extends \DataExtension {
 
     function updateCMSFields(\FieldList $fields){
         if(!$this->owner->hasExtension('ProductVariationsExtension') || !$this->owner->Variations()->exists())
-            $fields->addFieldToTab('Root.Main', NumericField::create($this->stockField, _t('ShopInventory.STOCK', 'Stock')), 'Content');
+            $fields->addFieldToTab('Root.Main', \NumericField::create($this->stockField, _t('ShopInventory.STOCK', 'Stock')), 'Content');
     }
 
     public function canPurchase($member, $quantity) {
-        if(SiteConfig::env('Shop_AlwaysAllowPurchase') !== null)
-            return SiteConfig::env('Shop_AlwaysAllowPurchase');
+        if(Config::env('Shop_AlwaysAllowPurchase') !== null)
+            return Config::env('Shop_AlwaysAllowPurchase');
 
-        if($this->owner->AvailableStock() > 0)
-            return true;
+        if($this->owner->AvailableStock() <= 0)
+            return false;
     }
 
     public function AvailableStock() {
@@ -44,13 +44,38 @@ class Product extends \DataExtension {
         return $stock;
     }
 
-    public function incrementStock($value = 1) {
+    public function incrementStock($value = 1, $write = true) {
         $this->owner->{$this->stockField} += $value;
+
+	    if($write) {
+		    $this->owner->write();
+
+		    if($this->owner->hasExtension('Versioned')) {
+			    $this->owner->writeToStage('Stage');
+			    $this->owner->publish('Stage','Live');
+		    }
+	    }
+
         return $this;
     }
 
-    public function decrementStock($value = 1) {
+    public function decrementStock($value = 1, $write = true) {
         $this->owner->{$this->stockField} -= $value;
+
+	    if($this->owner->{$this->stockField} <= 0)
+		    \Injector::inst()->get('Milkyway\SS\Events\Dispatcher')->fire('ShopInventory', 'zero');
+	    elseif(Config::env('Shop_NotifyWhenStockReaches') && $this->owner->{$this->stockField} <= Config::env('Shop_NotifyWhenStockReaches'))
+		    \Injector::inst()->get('Milkyway\SS\Events\Dispatcher')->fire('ShopInventory', ['belowIndicator']);
+
+	    if($write) {
+		    $this->owner->write();
+
+		    if($this->owner->hasExtension('Versioned')) {
+			    $this->owner->writeToStage('Stage');
+			    $this->owner->publish('Stage','Live');
+		    }
+	    }
+
         return $this;
     }
 } 
