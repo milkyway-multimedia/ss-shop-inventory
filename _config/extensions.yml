@@ -1,0 +1,22 @@
+---
+Name: shop-inventory--extensions
+After:
+- 'framework/*'
+---
+Order:
+  extensions:
+    - 'Milkyway\SS\Shop\Inventory\Extensions\Order'
+OrderItem:
+  extensions:
+    - 'Milkyway\SS\Shop\Inventory\Extensions\OrderItem'
+Product:
+  extensions:
+    - 'Milkyway\SS\Shop\Inventory\Extensions\Product'
+SiteConfig:
+  extensions:
+    - 'Milkyway\SS\Shop\Inventory\Extensions\SiteConfig'
+EventDispatcher:
+  ShopInventory:
+    listeners:
+      'Milkyway\SS\Shop\Inventory\Listeners\EmailNotifications':
+        events: ['zero', 'belowIndicator']
