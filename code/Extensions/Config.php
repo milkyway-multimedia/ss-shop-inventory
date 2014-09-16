@@ -17,6 +17,7 @@ class Config extends \DataExtension {
     private static $db = [
         'Shop_DisableInventory' => 'Boolean',
         'Shop_NotifyWhenStockReaches' => 'Int',
+        'Shop_DefaultStock' => 'Int',
         'Shop_NotifyEmail' => 'Varchar',
     ];
 
@@ -27,10 +28,13 @@ class Config extends \DataExtension {
     private static $shop_affect_stock_during = 'placement'; // Can be: cart, placement, payment
 
     public function updateCMSFields(\FieldList $fields) {
+        $productDefaults = (array) \Product::config()->defaults;
+
         $fields->addFieldsToTab('Root.Shop.ShopTabs.ShopInventory', [
-                \CheckboxField::create('Shop_DisableInventory', _t('ShopInventory.DISABLE', 'Disable')),
+                \CheckboxField::create('Shop_DisableInventory', _t('ShopInventory.DisableInventory', 'Disable')),
                 \NumericField::create('Shop_NotifyWhenStockReaches', _t('ShopInventory.NotifyWhenStockReaches', 'Notify when stock reaches')),
-                \TextField::create('Shop_NotifyEmail', _t('ShopInventory.NotifyWhenStockReaches', 'Email to notify'))->setAttribute('placeholder', Config::env('AdminForEmail') ? : \Config::inst()->get('Email', 'admin_email')),
+                \NumericField::create('Shop_DefaultStock', _t('ShopInventory.DefaultStock', 'Default stock for new products'))->setAttribute('placeholder', isset($productDefaults['Stock']) ? $productDefaults['Stock'] : 5),
+                \TextField::create('Shop_NotifyEmail', _t('ShopInventory.NotifyEmail', 'Email to notify'))->setAttribute('placeholder', Config::env('AdminForEmail') ? : \Config::inst()->get('Email', 'admin_email')),
             ]
         );
     }

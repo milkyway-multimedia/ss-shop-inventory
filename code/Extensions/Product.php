@@ -12,11 +12,20 @@ class Product extends \DataExtension {
         'Stock' => 'Int',
     ];
 
+    private static $defaults = [
+        'Stock' => 5,
+    ];
+
     protected $stockField = 'Stock';
 
     public function __construct($stockField = 'Stock') {
         parent::__construct();
         $this->stockField = $stockField;
+    }
+
+    function populateDefaults() {
+        if($this->owner->hasDatabaseField($this->stockField))
+            $this->owner->{$this->stockField} = Config::env('Shop_DefaultStock') ? : $this->owner->Stock;
     }
 
     function updateCMSFields(\FieldList $fields){
@@ -77,5 +86,9 @@ class Product extends \DataExtension {
 	    }
 
         return $this;
+    }
+
+    public function getStockField() {
+        return $this->stockField;
     }
 } 
