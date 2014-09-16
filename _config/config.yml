@@ -11,10 +11,10 @@ OrderItem:
     - 'Milkyway\SS\Shop\Inventory\Extensions\OrderItem'
 Product:
   extensions:
-    - 'Milkyway\SS\Shop\Inventory\Extensions\Product'
+    - 'Milkyway\SS\Shop\Inventory\Extensions\TrackStockOnBuyable'
 ProductVariation:
   extensions:
-    - 'Milkyway\SS\Shop\Inventory\Extensions\Product'
+    - 'Milkyway\SS\Shop\Inventory\Extensions\TrackStockOnBuyable'
 SiteConfig:
   extensions:
     - 'Milkyway\SS\Shop\Inventory\Extensions\Config'
@@ -30,4 +30,4 @@ EventDispatcher:
 
 Injector:
   ProductStockDecorator:
-    class: 'Milkyway\SS\Shop\Inventory\Extensions\Product'
+    class: 'Milkyway\SS\Shop\Inventory\Extensions\TrackStockOnBuyable'

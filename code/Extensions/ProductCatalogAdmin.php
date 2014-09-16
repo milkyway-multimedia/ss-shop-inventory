@@ -19,7 +19,7 @@ class ProductCatalogAdmin extends \Extension {
 	function updateEditForm($form) {
         $model = singleton($this->owner->modelClass);
 
-        if($model->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\Product') && $gf = $form->Fields()->dataFieldByName($this->sanitiseClassName($this->owner->modelClass))) {
+        if($model->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\TrackStockOnBuyable') && $gf = $form->Fields()->dataFieldByName($this->sanitiseClassName($this->owner->modelClass))) {
             if(\ClassInfo::exists('GridFieldEditableColumns')) {
                 $gf->Config->addComponent($this->stockComponent = with(new \GridFieldEditableColumns)->setDisplayFields([
                             $model->StockField => [
@@ -38,12 +38,23 @@ class ProductCatalogAdmin extends \Extension {
 	}
 
     function saveStock($data, $form, $request) {
+        // @todo placeholder dataobject for now
         $model = singleton($this->owner->modelClass);
 
-        if($model->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\Product') && $gf = $form->Fields()->dataFieldByName($this->sanitiseClassName($this->owner->modelClass))) {
-            if($this->stockComponent && ($this->stockComponent instanceof \GridField_SaveHandler))
+        if($model->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\TrackStockOnBuyable') && $gf = $form->Fields()->dataFieldByName($this->sanitiseClassName($this->owner->modelClass))) {
+            if($this->stockComponent && ($this->stockComponent instanceof \GridField_SaveHandler)) {
                 $this->stockComponent->handleSave($gf, $model);
-            else
+
+                // A bit annoying, but since its versioned we have to save and publish
+                $gf->List->each(
+                    function ($item) {
+                        if($item->hasExtension('Versioned')) {
+                            $item->writeToStage('Stage');
+                            $item->publish('Stage','Live');
+                        }
+                    }
+                );
+            } else
                 $form->saveInto($model);
         }
 

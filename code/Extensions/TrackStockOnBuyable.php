@@ -7,7 +7,7 @@
  * @author Mellisa Hankins <mell@milkywaymultimedia.com.au>
  */
 
-class Product extends \DataExtension {
+class TrackStockOnBuyable extends \DataExtension {
     private static $db = [
         'Stock' => 'Int',
     ];
@@ -24,8 +24,9 @@ class Product extends \DataExtension {
     }
 
     function populateDefaults() {
-        if($this->owner->hasDatabaseField($this->stockField))
-            $this->owner->{$this->stockField} = Config::env('Shop_DefaultStock') ? : $this->owner->Stock;
+        // @todo not working on initial install...
+        //if($this->owner->hasDatabaseField($this->stockField))
+            //$this->owner->{$this->stockField} = Config::env('Shop_DefaultStock') ? : $this->owner->Stock;
     }
 
     function updateCMSFields(\FieldList $fields){
@@ -68,13 +69,13 @@ class Product extends \DataExtension {
         return $this;
     }
 
-    public function decrementStock($value = 1, $write = true) {
+    public function decrementStock($value = 1, $orderItem = null, $write = true) {
         $this->owner->{$this->stockField} -= $value;
 
 	    if($this->owner->{$this->stockField} <= 0)
-		    \Injector::inst()->get('Milkyway\SS\Events\Dispatcher')->fire('ShopInventory', 'zero');
+		    \Injector::inst()->get('Milkyway\SS\Events\Dispatcher')->fire('ShopInventory', 'zero', $this->owner, $orderItem);
 	    elseif(Config::env('Shop_NotifyWhenStockReaches') && $this->owner->{$this->stockField} <= Config::env('Shop_NotifyWhenStockReaches'))
-		    \Injector::inst()->get('Milkyway\SS\Events\Dispatcher')->fire('ShopInventory', ['belowIndicator']);
+		    \Injector::inst()->get('Milkyway\SS\Events\Dispatcher')->fire('ShopInventory', 'belowIndicator', $this->owner, $orderItem);
 
 	    if($write) {
 		    $this->owner->write();

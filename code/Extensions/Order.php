@@ -12,16 +12,16 @@ namespace Milkyway\SS\Shop\Inventory\Extensions;
 
 class Order extends \DataExtension {
     public function afterAdd($item, $buyable, $quantity, $filter) {
-        if($this->isAffectedItem($buyable))
-            $buyable->decrementStock($quantity);
+        if($buyable && $this->isAffectedItem($buyable))
+            $buyable->decrementStock($quantity, $item);
     }
 
     public function afterRemove($item, $buyable, $quantity, $filter) {
-        if($this->isAffectedItem($buyable))
-            $buyable->incrementStock($quantity);
+        if($buyable && $this->isAffectedItem($buyable))
+            $buyable->incrementStock($quantity, $item);
     }
 
     protected function isAffectedItem($buyable) {
-        return !Config::env('Shop_DisableInventory') && strtolower(Config::env('Shop_AffectStockDuring')) == 'cart' && ($buyable instanceof \Object) && $buyable->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\Product');
+        return !Config::env('Shop_DisableInventory') && strtolower(Config::env('Shop_AffectStockDuring')) == 'cart' && ($buyable instanceof \Object) && $buyable->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\TrackStockOnBuyable');
     }
 } 
