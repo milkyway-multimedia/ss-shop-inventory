@@ -23,8 +23,8 @@ ProductCatalogAdmin:
     - 'Milkyway\SS\Shop\Inventory\Extensions\ProductCatalogAdmin'
 
 EventDispatcher:
-  ShopInventory:
-    listeners:
+  listeners:
+    ShopInventory:
       'Milkyway\SS\Shop\Inventory\Listeners\EmailNotifications':
         events: ['zero', 'belowIndicator']
 
