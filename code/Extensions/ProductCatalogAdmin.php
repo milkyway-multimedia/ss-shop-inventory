@@ -9,64 +9,37 @@
 
 namespace Milkyway\SS\Shop\Inventory\Extensions;
 
+use Milkyway\SS\GridFieldUtils\SaveAllButton;
+
 class ProductCatalogAdmin extends \Extension {
-    private static $allowed_actions = [
-        'EditForm',
-    ];
-
-    protected $stockComponent;
-
 	function updateEditForm($form) {
         $model = singleton($this->owner->modelClass);
 
         if($model->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\TrackStockOnBuyable') && $gf = $form->Fields()->dataFieldByName($this->sanitiseClassName($this->owner->modelClass))) {
             if(\ClassInfo::exists('GridFieldEditableColumns')) {
-                $gf->Config->addComponent($this->stockComponent = with(new \GridFieldEditableColumns)->setDisplayFields([
-                            $model->StockField => [
-                                'title' => _t('ShopInventory.'.$model->StockField, $model->StockField),
-                                'callback' => function($record, $col, $grid) {
-                                    return \NumericField::create($col, $col, $record->$col);
-                                },
-                            ],
-                        ]
-                    )
-                , 'GridFieldEditButton');
+	            $displayFields = [
+		            $model->StockField => [
+			            'title' => _t('ShopInventory.'.$model->StockField, $model->StockField),
+			            'callback' => function($record, $col, $grid) {
+				            return \NumericField::create($col, $col, $record->$col);
+			            },
+		            ],
+	            ];
 
-                $form->Actions()->push(\FormAction::create('saveStock', 'Update Stock'));
+	            if($columns = $gf->Config->getComponentByType('GridFieldEditableColumns')) {
+		            $columns->setDisplayFields($columns->getDisplayFields($gf) + $displayFields);
+	            }
+	            else {
+		            $gf->Config->addComponent(with(new \GridFieldEditableColumns)->setDisplayFields($displayFields
+			            )
+			            , 'GridFieldEditButton');
+	            }
+
+	            if(!$gf->Config->getComponentByType('Milkyway\SS\GridFieldUtils\SaveAllButton'))
+	                $gf->Config->addComponent(new SaveAllButton('buttons-before-left'));
             }
         }
 	}
-
-    function saveStock($data, $form, $request) {
-        // @todo placeholder dataobject for now
-        $model = singleton($this->owner->modelClass);
-
-        if($model->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\TrackStockOnBuyable') && $gf = $form->Fields()->dataFieldByName($this->sanitiseClassName($this->owner->modelClass))) {
-            if($this->stockComponent && ($this->stockComponent instanceof \GridField_SaveHandler)) {
-                $this->stockComponent->handleSave($gf, $model);
-
-                // A bit annoying, but since its versioned we have to save and publish
-                $gf->List->each(
-                    function ($item) {
-                        if($item->hasExtension('Versioned')) {
-                            $item->writeToStage('Stage');
-                            $item->publish('Stage','Live');
-                        }
-                    }
-                );
-            } else
-                $form->saveInto($model);
-        }
-
-        if ($model->exists()) {
-            $model->delete();
-            $model->destroy();
-        }
-
-        $this->owner->Response->addHeader('X-Status', rawurlencode(_t('ShopInventory.STOCK_SAVED', 'Stock saved.')));
-
-        return $this->owner->getResponseNegotiator()->respond($request);
-    }
 
     protected function sanitiseClassName($class) {
         return str_replace('\\', '-', $class);
