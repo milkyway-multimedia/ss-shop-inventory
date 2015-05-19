@@ -26,7 +26,7 @@
 		"doctrine/inflector"    : "~1"
 	},
 	"suggest" : {
-		"ajshort/silverstripe-gridfieldextensions": "Allow bulk editing stock (requires GridField Utils to work in ModelAdmin)",
+		"silverstripe-australia/silverstripe-gridfieldextensions": "Allow bulk editing stock (requires GridField Utils to work in ModelAdmin)",
 		"colymba/gridfield-bulk-editing-tools": "Allow bulk editing stock",
 		"milkyway-multimedia/ss-gridfield-utils": "Allow bulk editing stock (requires GridField Extensions to work in ModelAdmin)"
 	},
