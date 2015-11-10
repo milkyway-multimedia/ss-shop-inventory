@@ -22,7 +22,7 @@ class Order extends DataExtension
         });
     }
 
-    public function onPaid()
+    public function onPayment()
     {
         $this->owner->Items()->each(function ($item) {
             if ($item->Buyable() && $this->isAffectedItem($item->Buyable(), 'payment')) {
@@ -31,9 +31,20 @@ class Order extends DataExtension
         });
     }
 
+    public function beforeAdd($buyable, &$quantity, $filter)
+    {
+        if(!$this->isAffectedItem($buyable, '')) {
+            return;
+        }
+
+        if($buyable->AvailableStock() < $quantity) {
+            $quantity = $buyable->AvailableStock();
+        }
+    }
+
     public function afterAdd($item, $buyable, $quantity, $filter)
     {
-        if ($buyable && $this->isAffectedItem($buyable, 'cart')) {
+        if($buyable && $this->isAffectedItem($buyable, 'cart')) {
             $buyable->decrementStock($quantity, $item);
             $item->PreviousQuantity = null;
         }
@@ -45,6 +56,17 @@ class Order extends DataExtension
             $quantity = $item->exists() ? $quantity : $item->Quantity;
             $buyable->incrementStock($quantity, $item);
             $item->PreviousQuantity = null;
+        }
+    }
+
+    public function beforeSetQuantity($buyable, &$quantity, $filter)
+    {
+        if(!$this->isAffectedItem($buyable, '')) {
+            return;
+        }
+
+        if($buyable->AvailableStock() < $quantity) {
+            $quantity = $buyable->AvailableStock();
         }
     }
 
@@ -69,6 +91,6 @@ class Order extends DataExtension
 
     protected function isAffectedItem($buyable, $during = 'placement')
     {
-        return !Config::env('ShopConfig.Inventory.DisableInventory') && strtolower(Config::env('ShopConfig.Inventory.AffectStockDuring')) == $during && ($buyable instanceof Object) && $buyable->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\TrackStockOnBuyable');
+        return !Config::env('ShopConfig.Inventory.DisableInventory') && (!$during || strtolower(Config::env('ShopConfig.Inventory.AffectStockDuring')) == $during) && ($buyable instanceof Object) && $buyable->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\TrackStockOnBuyable');
     }
-} 
+}
