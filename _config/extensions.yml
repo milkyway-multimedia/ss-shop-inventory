@@ -1,7 +1,9 @@
 ---
-Name: shop-inventory
-After: ['framework/*']
-Before: ['shop/*']
+Name: shop-inventory--extensions
+After:
+  - 'framework/*'
+Before:
+  - 'shop/*'
 ---
 Order:
   extensions:
@@ -21,12 +23,6 @@ SiteConfig:
 ProductCatalogAdmin:
   extensions:
     - 'Milkyway\SS\Shop\Inventory\Extensions\ProductCatalogAdmin'
-
-EventDispatcher:
-  listeners:
-    ShopInventory:
-      'Milkyway\SS\Shop\Inventory\Listeners\EmailNotifications':
-        events: ['zero', 'belowIndicator']
 
 Injector:
   ProductStockDecorator:

@@ -1,36 +1,36 @@
 {
-	"name"       : "milkyway-multimedia/ss-shop-inventory",
-	"description": "A simple inventory tracker for the shop module",
-	"type"       : "silverstripe-module",
-	"keywords"   : [
-		"silverstripe",
-		"mwm",
-		"shop",
-		"ecommerce",
-		"orders",
-		"inventory",
-		"stock",
-		"stock control"
-	],
-	"license"    : "MIT",
-	"authors"    : [
-		{
-			"name" : "Mellisa Hankins",
-			"email": "mell@milkywaymultimedia.com.au"
-		}
-	],
-	"require"    : {
-		"silverstripe/framework": "~3.1",
-		"milkyway-multimedia/ss-eventful": "dev-master",
-		"milkyway-multimedia/ss-mwm": "dev-master",
-		"doctrine/inflector"    : "~1"
-	},
-	"suggest" : {
-		"ajshort/silverstripe-gridfieldextensions": "Allow bulk editing stock (requires GridField Utils to work in ModelAdmin)",
-		"colymba/gridfield-bulk-editing-tools": "Allow bulk editing stock",
-		"milkyway-multimedia/ss-gridfield-utils": "Allow bulk editing stock (requires GridField Extensions to work in ModelAdmin)"
-	},
-	"extra"      : {
-		"installer-name": "shop-inventory"
-	}
+  "name"        : "milkyway-multimedia/ss-shop-inventory",
+  "description" : "A simple inventory tracker for the shop module",
+  "type"        : "silverstripe-module",
+  "keywords"    : [
+    "silverstripe",
+    "mwm",
+    "shop",
+    "ecommerce",
+    "orders",
+    "inventory",
+    "stock",
+    "stock control"
+  ],
+  "license"     : "MIT",
+  "authors"     : [
+    {
+      "name"  : "Mellisa Hankins",
+      "email" : "mell@milkywaymultimedia.com.au"
+    }
+  ],
+  "require"     : {
+    "silverstripe/framework"          : "~3.1",
+    "milkyway-multimedia/ss-eventful" : "dev-master",
+    "milkyway-multimedia/ss-mwm"      : "dev-master",
+    "doctrine/inflector"              : "~1"
+  },
+  "suggest"     : {
+    "silverstripe-australia/gridfieldextensions" : "Allow bulk editing stock (requires GridField Utils to work in ModelAdmin)",
+    "colymba/gridfield-bulk-editing-tools"       : "Allow bulk editing stock",
+    "milkyway-multimedia/ss-gridfield-utils"     : "Allow bulk editing stock (requires GridField Extensions to work in ModelAdmin)"
+  },
+  "extra"       : {
+    "installer-name" : "shop-inventory"
+  }
 }

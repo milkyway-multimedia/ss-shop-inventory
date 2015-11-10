@@ -1,0 +1,13 @@
+---
+Name: shop-inventory--listeners
+After:
+  - 'framework/*'
+Before:
+  - 'shop/*'
+---
+Eventful:
+  listeners:
+    'shop:inventory:zero.shop:default':
+      - 'Milkyway\SS\Shop\Inventory\Listeners\EmailNotifications'
+    'shop:inventory:low.shop:default':
+      - 'Milkyway\SS\Shop\Inventory\Listeners\EmailNotifications'

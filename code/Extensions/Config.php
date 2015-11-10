@@ -1,19 +1,23 @@
-<?php
+<?php namespace Milkyway\SS\Shop\Inventory\Extensions;
+
 /**
  * Milkyway Multimedia
  * SiteConfig.php
  *
- * @package reggardocolaianni.com
+ * @package milkyway-multimedia/ss-shop-inventory
  * @author Mellisa Hankins <mell@milkywaymultimedia.com.au>
  */
 
-namespace Milkyway\SS\Shop\Inventory\Extensions;
+use DataExtension;
+use FieldList;
+use Product;
+use CheckboxField;
+use NumericField;
+use TextField;
+use Email;
+use SiteConfig;
 
-use Doctrine\Common\Inflector\Inflector;
-
-class Config extends \DataExtension {
-    public static $environment = [];
-
+class Config extends DataExtension {
     private static $db = [
         'Shop_DisableInventory' => 'Boolean',
         'Shop_NotifyWhenStockReaches' => 'Int',
@@ -23,52 +27,34 @@ class Config extends \DataExtension {
 
     private static $defaults = [
         'Shop_NotifyWhenStockReaches' => 5,
+        'Shop_DefaultStock' => 10,
     ];
 
-    private static $shop_affect_stock_during = 'placement'; // Can be: cart, placement, payment
-
-    public function updateCMSFields(\FieldList $fields) {
-        $productDefaults = (array) \Product::config()->defaults;
+    public function updateCMSFields(FieldList $fields) {
+        $productDefaults = (array) Product::config()->defaults;
 
         $fields->addFieldsToTab('Root.Shop.ShopTabs.ShopInventory', [
-                \CheckboxField::create('Shop_DisableInventory', _t('ShopInventory.DisableInventory', 'Disable')),
-                \NumericField::create('Shop_NotifyWhenStockReaches', _t('ShopInventory.NotifyWhenStockReaches', 'Notify when stock reaches')),
-                \NumericField::create('Shop_DefaultStock', _t('ShopInventory.DefaultStock', 'Default stock for new products'))->setAttribute('placeholder', isset($productDefaults['Stock']) ? $productDefaults['Stock'] : 5),
-                \TextField::create('Shop_NotifyEmail', _t('ShopInventory.NotifyEmail', 'Email to notify'))->setAttribute('placeholder', Config::env('AdminForEmail') ? : \Config::inst()->get('Email', 'admin_email')),
+                CheckboxField::create('Shop_DisableInventory', _t('ShopInventory.DisableInventory', 'Disable inventory management')),
+                NumericField::create('Shop_NotifyWhenStockReaches', _t('ShopInventory.NotifyWhenStockReaches', 'Notify when stock reaches')),
+                NumericField::create('Shop_DefaultStock', _t('ShopInventory.DefaultStock', 'Default stock for new products'))->setAttribute('placeholder', isset($productDefaults['Stock']) ? $productDefaults['Stock'] : 5),
+                TextField::create('Shop_NotifyEmail', _t('ShopInventory.NotifyEmail', 'Email to notify'))->setAttribute('placeholder', Config::env('AdminForEmail') ? : Email::config()->admin_email),
             ]
         );
     }
 
-    public static function env($setting, \ViewableData $object = null) {
-        if($object && $object->$setting)
-            return $object->$setting;
+    public static function env($setting, $default = null, $params = []) {
+        $callbacks = [];
 
-        if(isset(self::$environment[$setting]))
-            return self::$environment[$setting];
+        if (class_exists('SiteConfig')) {
+            $siteConfig = SiteConfig::current_site_config();
 
-        $value = null;
-
-        $dbSetting = $setting;
-        $envSetting = strtolower(Inflector::tableize($setting));
-
-        if($object)
-            $value = $object->config()->$envSetting;
-        elseif (\ShopConfig::current()->$dbSetting) {
-            $value = \ShopConfig::current()->$dbSetting;
-        }
-        elseif (\ShopConfig::config()->$envSetting) {
-            $value = \ShopConfig::config()->$envSetting;
-        }
-        else if (getenv($envSetting)) {
-            $value = getenv($envSetting);
-        } elseif (isset($_ENV[$envSetting])) {
-            $value = $_ENV[$envSetting];
+            $callbacks['ShopConfig'] = function ($keyParts, $key) use ($setting, $siteConfig) {
+                return $siteConfig->{str_replace('ShopConfig.Inventory.', 'Shop_', $setting)};
+            };
         }
 
-        if ($value) {
-            self::$environment[$setting] = $value;
-        }
-
-        return $value;
+        return singleton('env')->get($setting, $default, array_merge([
+            'beforeConfigNamespaceCheckCallbacks' => $callbacks,
+        ], $params));
     }
 } 

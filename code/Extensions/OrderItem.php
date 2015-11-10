@@ -1,32 +1,28 @@
-<?php
+<?php namespace Milkyway\SS\Shop\Inventory\Extensions;
+
 /**
  * Milkyway Multimedia
  * OrderItem.php
  *
- * @package reggardocolaianni.com
+ * @package milkyway-multimedia/ss-shop-inventory
  * @author Mellisa Hankins <mell@milkywaymultimedia.com.au>
  */
 
-namespace Milkyway\SS\Shop\Inventory\Extensions;
+use Object;
+use DataExtension;
 
+class OrderItem extends DataExtension {
+    private $prevQuantity;
 
-class OrderItem extends \DataExtension {
-    function onPlacement() {
-        if($this->owner->Buyable() && $this->isAffectedItem($this->owner->Buyable(), 'placement'))
-            $this->owner->Buyable()->decrementStock($this->owner->Quantity, $this->owner);
+    public function onBeforeWrite() {
+        if($this->owner->isChanged('Quantity')) {
+            $changed = $this->owner->getChangedFields();
+            $this->prevQuantity = isset($changed['Quantity']) && isset($changed['Quantity']['before']) ? $changed['Quantity']['before'] : 0;
+        }
     }
 
-    function onPayment() {
-        if($this->owner->Buyable() && $this->isAffectedItem($this->owner->Buyable(), 'payment'))
-            $this->owner->Buyable()->decrementStock($this->owner->Quantity, $this->owner);
-    }
-
-    function onBeforeDelete() {
-        if($this->owner->Buyable() && $this->owner->_ReturnStock)
-            $this->owner->Buyable()->incrementStock($this->owner->Quantity);
-    }
-
-    protected function isAffectedItem($buyable, $during) {
-        return !Config::env('Shop_DisableInventory') && strtolower(Config::env('Shop_AffectStockDuring')) == $during && ($buyable instanceof \Object) && $buyable->hasExtension('Milkyway\SS\Shop\Inventory\Extensions\TrackStockOnBuyable');
+    public function onAfterWrite() {
+        $this->owner->PreviousQuantity = $this->prevQuantity;
+        $this->prevQuantity = null;
     }
 } 

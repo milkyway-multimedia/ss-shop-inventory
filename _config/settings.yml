@@ -1,0 +1,10 @@
+---
+Name: shop-inventory--settings
+After:
+  - 'framework/*'
+Before:
+  - 'shop/*'
+---
+ShopConfig:
+  Inventory:
+    AffectStockDuring: 'placement'
