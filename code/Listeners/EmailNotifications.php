@@ -17,16 +17,19 @@ class EmailNotifications
 {
     public function zero($e, $buyable, $orderItem = null)
     {
+        $url = $buyable->hasMethod('CMSEditLink') ? $buyable->CMSEditLink() : $buyable->CMSEditLink;
+
         $this->sendNotification([
             'params' => [
                 'Subject' => _t('ShopInventory.EmailSubject-NONE', 'NO STOCK FOR: {title}', ['title' => $buyable->Title]),
                 'Content'    => _t('ShopInventory.EmailBody-NONE',
-                    'There is no longer any stock for {title}. <a href="{url}">You can update the stock for {title} in the {application}</a>',
+                    'There is no longer any stock for {title}. <a href="{url}">You can update the stock for {title} in the {application}</a>.',
                     [
                         'title'       => $buyable->Title,
-                        'url'         => $buyable->hasMethod('CMSEditLink') ? $buyable->CMSEditLink() : $buyable->CMSEditLink,
+                        'url'         => $url,
                         'application' => singleton('LeftAndMain')->ApplicationName,
                     ]),
+                'Link' => $url,
             ],
             'buyable' => $buyable,
             'item' => $orderItem,
@@ -35,18 +38,21 @@ class EmailNotifications
 
     public function low($e, $buyable, $orderItem = null)
     {
+        $url = $buyable->hasMethod('CMSEditLink') ? $buyable->CMSEditLink() : $buyable->CMSEditLink;
+
         $this->sendNotification([
             'params' => [
                 'Subject' => _t('ShopInventory.EmailSubject-NONE', 'LOW STOCK FOR: {title}', ['title' => $buyable->Title]),
                 'Content'    => _t('ShopInventory.EmailBody-NONE',
-                    'There is only {stock} in stock for {title}, and has fallen below {indicator}. <a href="{url}">You can update the stock for {title} in the {application}</a>',
+                    'There is only {stock} in stock for {title}, and has fallen below {indicator}. <a href="{url}">You can update the stock for {title} in the {application}</a>.',
                     [
                         'title'       => $buyable->Title,
                         'stock'       => $buyable->AvailableStock(),
                         'indicator'   => Config::env('ShopConfig.Inventory.NotifyWhenStockReaches'),
-                        'url'         => $buyable->hasMethod('CMSEditLink') ? $buyable->CMSEditLink() : $buyable->CMSEditLink,
+                        'url'         => $url,
                         'application' => singleton('LeftAndMain')->ApplicationName,
                     ]),
+                'Link' => $url,
             ],
             'buyable' => $buyable,
             'item' => $orderItem,

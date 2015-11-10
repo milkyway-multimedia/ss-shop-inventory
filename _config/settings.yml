@@ -8,3 +8,5 @@ Before:
 ShopConfig:
   Inventory:
     AffectStockDuring: 'placement'
+    ZeroIndicatorInterval_Hours: 1
+    LowIndicatorInterval_Hours: 24

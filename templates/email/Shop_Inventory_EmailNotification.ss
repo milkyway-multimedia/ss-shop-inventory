@@ -15,7 +15,11 @@
     </tr>
     </thead>
     <tbody>
-        $Content
+    <tr>
+        <td>
+            $Content
+        </td>
+    </tr>
     </tbody>
 </table>
 </body>

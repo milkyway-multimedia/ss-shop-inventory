@@ -35,6 +35,7 @@ class Order extends DataExtension
     {
         if ($buyable && $this->isAffectedItem($buyable, 'cart')) {
             $buyable->decrementStock($quantity, $item);
+            $item->PreviousQuantity = null;
         }
     }
 
@@ -43,6 +44,7 @@ class Order extends DataExtension
         if ($buyable && $this->isAffectedItem($buyable, 'cart')) {
             $quantity = $item->exists() ? $quantity : $item->Quantity;
             $buyable->incrementStock($quantity, $item);
+            $item->PreviousQuantity = null;
         }
     }
 

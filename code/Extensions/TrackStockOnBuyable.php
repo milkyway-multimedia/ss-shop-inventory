@@ -17,6 +17,7 @@ use NumericField;
 use ToggleCompositeField;
 use CheckboxField;
 use DropdownField;
+use SS_Datetime;
 
 class TrackStockOnBuyable extends DataExtension
 {
@@ -25,11 +26,13 @@ class TrackStockOnBuyable extends DataExtension
     ];
 
     protected $stockField = 'Stock';
+    protected $autoAdjust = true;
 
-    public function __construct($stockField = 'Stock')
+    public function __construct($stockField = 'Stock', $autoAdjust = true)
     {
         parent::__construct();
         $this->stockField = $stockField;
+        $this->autoAdjust = $autoAdjust;
     }
 
     public static function get_extra_config($class, $extension, $args)
@@ -38,9 +41,11 @@ class TrackStockOnBuyable extends DataExtension
 
         return [
             'db' => [
-                $field                  => 'Int',
-                $field . '_NoTracking'  => 'Boolean',
-                $field . '_AlwaysAllow' => 'Boolean',
+                $field                     => 'Int',
+                $field . '_NoTracking'     => 'Boolean',
+                $field . '_AlwaysAllow'    => 'Boolean',
+                $field . '_LastSentOnLow'  => 'Datetime',
+                $field . '_LastSentOnZero' => 'Datetime',
             ],
         ];
     }
@@ -50,7 +55,7 @@ class TrackStockOnBuyable extends DataExtension
         $this->owner->{$this->stockField} = (int)Config::env('ShopConfig.Inventory.DefaultStock');
     }
 
-    function updateCMSFields(\FieldList $fields)
+    function updateCMSFields(FieldList $fields)
     {
         if ($this->owner->hasExtension('ProductVariationsExtension') && $this->owner->Variations()->exists()) {
             return;
@@ -78,6 +83,10 @@ class TrackStockOnBuyable extends DataExtension
             )->setName($this->stockField . '_Tab'),
             'Content'
         );
+
+        if(!$this->owner->AllowPurchase) {
+            $fields->removeByName($this->stockField . '_AlwaysAllow', true);
+        }
     }
 
     public function canPurchase($member, $quantity)
@@ -113,6 +122,7 @@ class TrackStockOnBuyable extends DataExtension
         }
 
         $this->owner->{$this->stockField} += $value;
+        $this->fireEvents($orderItem);
 
         if ($write) {
             $this->owner->write();
@@ -139,14 +149,16 @@ class TrackStockOnBuyable extends DataExtension
         $currentStock = $this->owner->{$this->stockField};
 
         if ($currentStock < $value) {
-            $value = $currentStock;
-            $result->error('Not enough stock, stock has been adjusted.', 'adjustment');
+            if($this->autoAdjust && $orderItem) {
+                $orderItem->Quantity = strtolower(Config::env('ShopConfig.Inventory.AffectStockDuring')) == 'cart' ? $orderItem->PreviousQuantity + $currentStock : $currentStock;
 
-            if ($orderItem) {
-                $orderItem->Quantity = $value;
                 if ($orderItem->exists() && $write) {
                     $orderItem->write();
+                    $result->error('Not enough stock, stock has been adjusted.', 'adjustment');
                 }
+            }
+            else {
+                $result->error('Not enough stock.', 'error');
             }
         }
 
@@ -156,11 +168,7 @@ class TrackStockOnBuyable extends DataExtension
             $this->owner->{$this->stockField} = 0;
         }
 
-        if ($this->owner->{$this->stockField} <= 0) {
-            singleton('Eventful')->fire('shop:inventory:zero', $this->owner, $orderItem);
-        } elseif (($notifyLimit = Config::env('ShopConfig.Inventory.NotifyWhenStockReaches')) && $this->owner->{$this->stockField} <= $notifyLimit) {
-            singleton('Eventful')->fire('shop:inventory:low', $this->owner, $orderItem);
-        }
+        $this->fireEvents($orderItem);
 
         if ($write) {
             $this->owner->write();
@@ -179,5 +187,35 @@ class TrackStockOnBuyable extends DataExtension
     public function getStockField()
     {
         return $this->stockField;
+    }
+
+    public function isOutOfStock() {
+        return $this->owner->{$this->stockField} <= 0;
+    }
+
+    public function isOnLowStock() {
+        return ($notifyLimit = Config::env('ShopConfig.Inventory.NotifyWhenStockReaches')) && $this->owner->{$this->stockField} <= $notifyLimit;
+    }
+
+    protected function fireEvents($orderItem = null) {
+        if ($this->owner->isOutOfStock() && $this->doFire('zero')) {
+            singleton('Eventful')->fire('shop:inventory:zero', $this->owner, $orderItem);
+            $this->owner->{$this->stockField.'_LastSentOnZero'} = SS_Datetime::now()->Rfc2822();
+        } elseif ($this->owner->isOnLowStock() && $this->doFire('low')) {
+            singleton('Eventful')->fire('shop:inventory:low', $this->owner, $orderItem);
+            $this->owner->{$this->stockField.'_LastSentOnLow'} = SS_Datetime::now()->Rfc2822();
+        }
+    }
+
+    protected function doFire($event = 'zero') {
+        if($event == 'low') {
+            return $this->owner->{$this->stockField.'_LastSentOnLow'} ? $this->hoursIsWithin($this->owner->{$this->stockField.'_LastSentOnLow'}, Config::env('ShopConfig.Inventory.LowIndicatorInterval_Hours', 24)) : true;
+        }
+
+        return $this->owner->{$this->stockField.'_LastSentOnZero'} ?$this->hoursIsWithin($this->owner->{$this->stockField.'_LastSentOnZero'}, Config::env('ShopConfig.Inventory.ZeroIndicatorInterval_Hours', 1)) : true;
+    }
+
+    protected function hoursIsWithin($value, $range) {
+        return round(abs(SS_Datetime::now()->Format('U') - strtotime($value))/3600) >= $range;
     }
 } 
