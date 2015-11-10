@@ -22,13 +22,12 @@
   "require"     : {
     "silverstripe/framework"          : "~3.1",
     "milkyway-multimedia/ss-eventful" : "dev-master",
-    "milkyway-multimedia/ss-mwm"      : "dev-master",
-    "doctrine/inflector"              : "~1"
+    "milkyway-multimedia/ss-mwm"      : "dev-master"
   },
   "suggest"     : {
-    "silverstripe-australia/gridfieldextensions" : "Allow bulk editing stock (requires GridField Utils to work in ModelAdmin)",
-    "colymba/gridfield-bulk-editing-tools"       : "Allow bulk editing stock",
-    "milkyway-multimedia/ss-gridfield-utils"     : "Allow bulk editing stock (requires GridField Extensions to work in ModelAdmin)"
+    "silverstripe-australia/gridfieldextensions" : "Allow bulk editing stock (requires ss-gridfield-utils to work in ModelAdmin)",
+    "milkyway-multimedia/ss-gridfield-utils"     : "Allow bulk editing stock (requires gridfieldextensions to work in ModelAdmin)",
+    "colymba/gridfield-bulk-editing-tools"       : "Allow bulk editing stock"
   },
   "extra"       : {
     "installer-name" : "shop-inventory"
