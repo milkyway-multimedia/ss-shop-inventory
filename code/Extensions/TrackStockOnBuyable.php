@@ -102,13 +102,15 @@ class TrackStockOnBuyable extends DataExtension
         }
     }
 
-    public function canPurchase($member, $quantity)
+    public function canPurchase($member = null, $quantity = 1)
     {
         if (Config::env('ShopConfig.Inventory.AlwaysAllowPurchase') !== null) {
             return Config::env('ShopConfig.Inventory.AlwaysAllowPurchase');
         }
 
-        if (!$this->owner->{$this->stockField . '_AlwaysAllow'} && $this->owner->AvailableStock() < $quantity) {
+        $stock = $this->owner->AvailableStock();
+
+        if (!$this->owner->{$this->stockField . '_AlwaysAllow'} && (!$stock || $stock < $quantity)) {
             return false;
         }
     }
