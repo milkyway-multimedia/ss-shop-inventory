@@ -8,6 +8,7 @@
  * @author Mellisa Hankins <mell@milkywaymultimedia.com.au>
  */
 
+use DB;
 use DataExtension;
 use FieldList;
 use Product;
@@ -45,7 +46,7 @@ class Config extends DataExtension {
     public static function env($setting, $default = null, $params = []) {
         $callbacks = [];
 
-        if (class_exists('SiteConfig')) {
+        if (class_exists('SiteConfig') && DB::get_schema()->hasTable('SiteConfig')) {
             $siteConfig = SiteConfig::current_site_config();
 
             $callbacks['ShopConfig'] = function ($keyParts, $key) use ($setting, $siteConfig) {
