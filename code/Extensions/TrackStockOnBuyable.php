@@ -70,7 +70,7 @@ class TrackStockOnBuyable extends DataExtension
 
     function updateCMSFields(FieldList $fields)
     {
-        if ($this->owner->hasExtension('ProductVariationsExtension') && $this->owner->Variations()->exists()) {
+        if (Config::env('ShopConfig.Inventory.DisableInventory')  || ($this->owner->hasExtension('ProductVariationsExtension') && $this->owner->Variations()->exists())) {
             return;
         }
 
@@ -104,8 +104,8 @@ class TrackStockOnBuyable extends DataExtension
 
     public function canPurchase($member = null, $quantity = 1)
     {
-        if (Config::env('ShopConfig.Inventory.AlwaysAllowPurchase') !== null) {
-            return Config::env('ShopConfig.Inventory.AlwaysAllowPurchase');
+        if (Config::env('ShopConfig.Inventory.DisableInventory') || Config::env('ShopConfig.Inventory.AlwaysAllowPurchase')) {
+            return null;
         }
 
         $stock = $this->owner->AvailableStock();
@@ -113,6 +113,8 @@ class TrackStockOnBuyable extends DataExtension
         if (!$this->owner->{$this->stockField . '_AlwaysAllow'} && (!$stock || $stock < $quantity)) {
             return false;
         }
+
+        return null;
     }
 
     public function AvailableStock($checkVariations = true)
