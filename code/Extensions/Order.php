@@ -33,18 +33,18 @@ class Order extends DataExtension
 
     public function beforeAdd($buyable, &$quantity, $filter)
     {
-        if(!$this->isAffectedItem($buyable, '')) {
+        if (!$this->isAffectedItem($buyable, '')) {
             return;
         }
 
-        if($buyable->AvailableStock() < $quantity) {
+        if ($buyable->AvailableStock() < $quantity) {
             $quantity = $buyable->AvailableStock();
         }
     }
 
     public function afterAdd($item, $buyable, $quantity, $filter)
     {
-        if($buyable && $this->isAffectedItem($buyable, 'cart')) {
+        if ($buyable && $this->isAffectedItem($buyable, 'cart')) {
             $buyable->decrementStock($quantity, $item);
             $item->PreviousQuantity = null;
         }
@@ -61,11 +61,11 @@ class Order extends DataExtension
 
     public function beforeSetQuantity($buyable, &$quantity, $filter)
     {
-        if(!$this->isAffectedItem($buyable, '')) {
+        if (!$this->isAffectedItem($buyable, '')) {
             return;
         }
 
-        if($buyable->AvailableStock() < $quantity) {
+        if ($buyable->AvailableStock() < $quantity) {
             $quantity = $buyable->AvailableStock();
         }
     }

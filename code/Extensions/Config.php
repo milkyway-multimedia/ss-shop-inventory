@@ -18,7 +18,8 @@ use TextField;
 use Email;
 use SiteConfig;
 
-class Config extends DataExtension {
+class Config extends DataExtension
+{
     private static $db = [
         'Shop_DisableInventory' => 'Boolean',
         'Shop_NotifyWhenStockReaches' => 'Int',
@@ -31,7 +32,8 @@ class Config extends DataExtension {
         'Shop_DefaultStock' => 10,
     ];
 
-    public function updateCMSFields(FieldList $fields) {
+    public function updateCMSFields(FieldList $fields)
+    {
         $productDefaults = (array) Product::config()->defaults;
 
         $fields->addFieldsToTab('Root.Shop.ShopTabs.ShopInventory', [
@@ -43,7 +45,8 @@ class Config extends DataExtension {
         );
     }
 
-    public static function env($setting, $default = null, $params = []) {
+    public static function env($setting, $default = null, $params = [])
+    {
         $callbacks = [];
 
         if (class_exists('SiteConfig') && DB::get_schema()->hasTable('SiteConfig')) {
@@ -58,4 +61,4 @@ class Config extends DataExtension {
             'beforeConfigNamespaceCheckCallbacks' => $callbacks,
         ], $params));
     }
-} 
+}

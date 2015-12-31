@@ -18,7 +18,6 @@ use ToggleCompositeField;
 use CheckboxField;
 use DropdownField;
 use SS_Datetime;
-
 use ValidationException;
 
 class TrackStockOnBuyable extends DataExtension
@@ -63,12 +62,12 @@ class TrackStockOnBuyable extends DataExtension
         ];
     }
 
-    function populateDefaults()
+    public function populateDefaults()
     {
         $this->owner->{$this->stockField} = (int)Config::env('ShopConfig.Inventory.DefaultStock');
     }
 
-    function updateCMSFields(FieldList $fields)
+    public function updateCMSFields(FieldList $fields)
     {
         if (Config::env('ShopConfig.Inventory.DisableInventory')  || ($this->owner->hasExtension('ProductVariationsExtension') && $this->owner->Variations()->exists())) {
             return;
@@ -249,4 +248,4 @@ class TrackStockOnBuyable extends DataExtension
     {
         return round(abs(SS_Datetime::now()->Format('U') - strtotime($value)) / 3600) >= $range;
     }
-} 
+}
