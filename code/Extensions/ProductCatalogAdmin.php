@@ -14,7 +14,7 @@ use NumericField;
 
 class ProductCatalogAdmin extends Extension
 {
-    function updateEditForm($form)
+    public function updateEditForm($form)
     {
         $model = singleton($this->owner->modelClass);
 
@@ -33,8 +33,7 @@ class ProductCatalogAdmin extends Extension
                     $columns->setDisplayFields($columns->getDisplayFields($gf) + $displayFields);
                 } else {
                     $gf->Config->addComponent(with(new \GridFieldEditableColumns)->setDisplayFields($displayFields
-                    )
-                        , 'GridFieldEditButton');
+                    ), 'GridFieldEditButton');
                 }
 
                 if (!$gf->Config->getComponentByType('Milkyway\SS\GridFieldUtils\SaveAllButton')) {
@@ -48,4 +47,4 @@ class ProductCatalogAdmin extends Extension
     {
         return str_replace('\\', '-', $class);
     }
-} 
+}

@@ -10,7 +10,6 @@
 
 use Milkyway\SS\Shop\Inventory\Extensions\Config;
 use Email;
-
 use CLosure;
 
 class EmailNotifications
@@ -64,12 +63,13 @@ class EmailNotifications
         $email = Email::create();
         $email->setTemplate('Shop_Inventory_EmailNotification');
 
-        if(isset($params['params'])) {
-            foreach($params['params'] as $paramName => $param)
+        if (isset($params['params'])) {
+            foreach ($params['params'] as $paramName => $param) {
                 $email->$paramName = $param;
+            }
         }
 
-        $adminEmail = function() {
+        $adminEmail = function () {
             return Config::env('ShopConfig.Inventory.NotifyEmail') ?: Config::env('ShopConfig|SiteConfig.AdminForEmail') ?: Email::config()->admin_email;
         };
 
@@ -81,7 +81,7 @@ class EmailNotifications
             $email->From = $adminEmail instanceof Closure ? $adminEmail() : $adminEmail;
         }
 
-        if(isset($params['buyable'])) {
+        if (isset($params['buyable'])) {
             $email->Buyable = $params['buyable'];
         }
 
@@ -95,4 +95,4 @@ class EmailNotifications
 
         return $email->send();
     }
-} 
+}
