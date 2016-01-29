@@ -49,7 +49,7 @@ class Config extends DataExtension
     {
         $callbacks = [];
 
-        if (class_exists('SiteConfig') && DB::get_schema()->hasTable('SiteConfig')) {
+        if (class_exists('SiteConfig') && !DB::get_schema()->isSchemaUpdating()) {
             $siteConfig = SiteConfig::current_site_config();
 
             $callbacks['ShopConfig'] = function ($keyParts, $key) use ($setting, $siteConfig) {
