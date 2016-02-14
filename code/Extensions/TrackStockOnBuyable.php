@@ -73,31 +73,29 @@ class TrackStockOnBuyable extends DataExtension
             return;
         }
 
-        $fields->addFieldToTab(
-            'Root.Main',
-            FieldGroup::create(
-                _t('ShopInventory.' . $this->stockField, FormField::name_to_label($this->stockField)),
-                [
-                    NumericField::create($this->stockField, ''),
-                    ToggleCompositeField::create($this->stockField . '_Options',
-                        _t('ShopInventory.STOCK_OPTIONS', 'Options'),
-                        [
-                            DropdownField::create($this->stockField . '_NoTracking', '', [
-                                0 => _t('ShopInventory.TRACK_INVENTORY', 'Track inventory'),
-                                1 => _t('ShopInventory.NO_TRACK_INVENTORY', "Don't track inventory"),
-                            ]),
-                            CheckboxField::create($this->stockField . '_AlwaysAllow',
-                                _t('ShopInventory.ALWAYS_ALLOW_PURCHASE',
-                                    'Always allow purchase even when out of stock')),
-                        ]
-                    )->setHeadingLevel(5),
-                ]
-            )->setName($this->stockField . '_Tab'),
-            'Content'
-        );
+        $fieldgroup = FieldGroup::create(
+            _t('ShopInventory.' . $this->stockField, FormField::name_to_label($this->stockField)),
+            [
+                NumericField::create($this->stockField, ''),
+                ToggleCompositeField::create($this->stockField . '_Options',
+                    _t('ShopInventory.STOCK_OPTIONS', 'Options'),
+                    [
+                        DropdownField::create($this->stockField . '_NoTracking', '', [
+                            0 => _t('ShopInventory.TRACK_INVENTORY', 'Track inventory'),
+                            1 => _t('ShopInventory.NO_TRACK_INVENTORY', "Don't track inventory"),
+                        ]),
+                        CheckboxField::create($this->stockField . '_AlwaysAllow',
+                            _t('ShopInventory.ALWAYS_ALLOW_PURCHASE',
+                                'Allow purchase even when out of stock')),
+                    ]
+                )->setHeadingLevel(5),
+            ]
+        )->setName($this->stockField . '_Tab');
 
-        if (!$this->owner->AllowPurchase) {
-            $fields->removeByName($this->stockField . '_AlwaysAllow', true);
+        if($fields->hasTabSet('Root')) {
+            $fields->addFieldToTab('Root.Main', $fieldgroup, 'Content');
+        } else {
+            $fields->push($fieldgroup);
         }
     }
 
@@ -146,8 +144,11 @@ class TrackStockOnBuyable extends DataExtension
 
         if ($write) {
             $this->owner->write();
-
-            if ($this->owner->hasExtension('Versioned')) {
+            
+            if (
+                $this->owner->hasExtension('Versioned') &&
+                in_array("Stage", $this->owner->getVersionedStages())
+            ) {
                 $this->owner->writeToStage('Stage');
                 $this->owner->publish('Stage', 'Live');
             }
@@ -196,7 +197,10 @@ class TrackStockOnBuyable extends DataExtension
         if ($write) {
             $this->owner->write();
 
-            if ($this->owner->hasExtension('Versioned')) {
+            if (
+                $this->owner->hasExtension('Versioned') &&
+                in_array("Stage", $this->owner->getVersionedStages())
+            ) {
                 $this->owner->writeToStage('Stage');
                 $this->owner->publish('Stage', 'Live');
             }
