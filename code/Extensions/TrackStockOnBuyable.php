@@ -144,10 +144,11 @@ class TrackStockOnBuyable extends DataExtension
 
         if ($write) {
             $this->owner->write();
-
-            $stages = $this->owner->getVersionedStages();
             
-            if ($this->owner->hasExtension('Versioned') && in_array("Stage", $stages)) {
+            if (
+                $this->owner->hasExtension('Versioned') &&
+                in_array("Stage", $this->owner->getVersionedStages())
+            ) {
                 $this->owner->writeToStage('Stage');
                 $this->owner->publish('Stage', 'Live');
             }
@@ -196,9 +197,10 @@ class TrackStockOnBuyable extends DataExtension
         if ($write) {
             $this->owner->write();
 
-            $stages = $this->owner->getVersionedStages();
-
-            if ($this->owner->hasExtension('Versioned') && in_array("Stage", $stages)) {
+            if (
+                $this->owner->hasExtension('Versioned') &&
+                in_array("Stage", $this->owner->getVersionedStages())
+            ) {
                 $this->owner->writeToStage('Stage');
                 $this->owner->publish('Stage', 'Live');
             }
