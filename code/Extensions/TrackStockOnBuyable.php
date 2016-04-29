@@ -35,7 +35,7 @@ class TrackStockOnBuyable extends DataExtension
         parent::__construct();
         $this->stockField = $stockField;
         $this->autoAdjust = $autoAdjust;
-        $this->validateStock = $autoAdjust;
+        $this->validateStock = $validateStock;
     }
 
     public static function get_extra_config($class, $extension, $args)
